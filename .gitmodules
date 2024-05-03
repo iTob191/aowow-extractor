@@ -1,0 +1,6 @@
+[submodule "mpq-extractor"]
+	path = mpq-extractor
+	url = https://github.com/Sarjuuk/MPQExtractor.git
+[submodule "blp-converter"]
+	path = blp-converter
+	url = https://github.com/Sarjuuk/BLPConverter.git
