@@ -18,17 +18,26 @@ if ! mkdir -p "$OUT_PATH" ; then
 	error "internal: could not create output folder $(highlight "$OUT_PATH")"
 fi
 
+# error handling
+ERROR_FILE=$(mktemp)
+
 # extract mpq archives
-bash extract_mpq.sh $IN_PATH $OUT_PATH
+bash extract_mpq.sh $IN_PATH $OUT_PATH $ERROR_FILE
 
 # convert images & audio files in parallel
-bash convert_blp.sh $OUT_PATH &
+bash convert_blp.sh $OUT_PATH $ERROR_FILE &
 sleep 1 # give the first pv some time to start so the progress bars appear in order
-bash convert_audio.sh $OUT_PATH &
+bash convert_audio.sh $OUT_PATH $ERROR_FILE &
 
 wait
 
 echo "Removing unneeded files ..."
 find "$OUT_PATH" -type f \( -name '*.blp' -or -name '*.wav' -or -name '*.mp3' \) -delete
 
-success "Done."
+if [ -s "$ERROR_FILE" ]; then
+	printf "\n${T_RED}There were errors during the extraction or conversion process:${T_RESET}\n\n"
+	cat "$ERROR_FILE"
+	printf "\n${T_YELLOW}See log the files in the output directory for more details.${T_RESET}\n"
+fi
+
+success "Done"

@@ -2,18 +2,19 @@
 # color sequences & error #
 ###########################
 
-T_ERROR="\033[0;31m"
-T_SUCCESS="\033[0;32m"
+T_RED="\033[0;31m"
+T_YELLOW="\033[0;33m"
+T_GREEN="\033[0;32m"
 T_HIGHLIGHT="\033[01;36m"
 T_RESET="\033[0m"
 
 function error {
-	echo -e "${T_ERROR}[ERROR]${T_RESET} $1" >&2
+	echo -e "${T_RED}[ERROR]${T_RESET} $1" >&2
 	exit 1
 }
 
 function success {
-	echo -e "[${T_SUCCESS}OK${T_RESET}] $1"
+	echo -e "[${T_GREEN}OK${T_RESET}] $1"
 }
 
 function highlight {

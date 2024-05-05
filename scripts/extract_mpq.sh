@@ -5,6 +5,8 @@ source utils.sh
 
 IN_PATH=$1
 OUT_PATH=$2
+ERROR_FILE=$3
+LOG_FILE="$OUT_PATH/mpq.log"
 
 ###############
 # definitions #
@@ -75,7 +77,7 @@ if [ ${#AVAILABLE_LOCALES[@]} -eq 0 ]; then
 	error "no valid locale data found in $(highlight "$IN_PATH")"
 fi
 
-echo "Found locales: ${AVAILABLE_LOCALES[@]}"
+echo "Found locales: ${AVAILABLE_LOCALES[@]}" | tee -a $LOG_FILE
 
 generate_locale_mpqs test
 NUM_JOBS=$(( ${#MPQS_SHARED[@]} * ${#PATTERNS_SHARED[@]} + ${#MPQS_LOCALE_test[@]} * ${#PATTERNS_LOCALE_SHARED[@]} + ${#MPQS_LOCALE_test[@]} * ${#PATTERNS_LOCALE[@]} * ${#AVAILABLE_LOCALES[@]}))
@@ -95,7 +97,8 @@ function extractAll { # input, output, name of global variable with patterns
 	for input in "${inputs[@]}"; do
 		printf "%s\0" "${patterns[@]}" | \
 			parallel -0 -n1 --halt now,fail=1 \
-				"/extract/MPQExtractor -f -c -o \"$outPath\" -e {} \"$inPath/$input\" >/dev/null && printf ." >> "$(progress_increment_file mpq)"
+				"/extract/MPQExtractor -f -c -o \"$outPath\" -e {} \"$inPath/$input\"" > >(tee -a $LOG_FILE) 2> >(tee -a $LOG_FILE >> $ERROR_FILE) | \
+				grep --line-buffered "^Opening" | xargs -I{} printf . >> "$(progress_increment_file mpq)"
 	done
 }
 
