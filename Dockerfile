@@ -25,4 +25,3 @@ COPY ./scripts /extract
 
 WORKDIR /extract
 ENTRYPOINT [ "./extract_all.sh" ]
-CMD [ "--help" ]
