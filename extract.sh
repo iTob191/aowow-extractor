@@ -2,13 +2,15 @@
 
 DATA_PATH=$1
 OUT_PATH=$2
+LOCALES=$3
 
 function print_help {
 	echo ""
-	echo "Usage: $0 <data directory> <output directory>"
+	echo "Usage: $0 <data directory> <output directory> [locales]"
 	echo ""
 	echo "  data directory:     path to the data directory containing the mpq files"
 	echo "  output directory:   path to the output directory"
+	echo "  locales:            optional, comma-separated list of locales to extract (default: all locales)"
 }
 
 function print_error {
@@ -44,4 +46,4 @@ echo "Building docker container ..."
 docker build --quiet --tag=aowow-extractor . >/dev/null || exit 1
 
 echo "Starting docker container ..."
-docker run --rm -it -v "$DATA_PATH:/data:ro" -v "$OUT_PATH:/out:rw" aowow-extractor || exit 1
+docker run --rm -it -v "$DATA_PATH:/data:ro" -v "$OUT_PATH:/out:rw" aowow-extractor "$LOCALES" || exit 1

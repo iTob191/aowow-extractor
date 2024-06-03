@@ -6,13 +6,12 @@ source utils.sh
 IN_PATH=$1
 OUT_PATH=$2
 ERROR_FILE=$3
+SELECTED_LOCALES=$4
 LOG_FILE="$OUT_PATH/mpq.log"
 
 ###############
 # definitions #
 ###############
-
-LOCALES=( 'enUS' 'enGB' 'frFR' 'deDE' 'zhCN' 'esES' 'esMX' 'ruRU' )
 
 PATTERNS_SHARED=(
 	"sound\\*"
@@ -66,18 +65,33 @@ generate_locale_mpqs() {
 #############
 
 AVAILABLE_LOCALES=()
-for locale in "${LOCALES[@]}"; do
-	if [ -d "$IN_PATH/$locale" ]; then
-		AVAILABLE_LOCALES+=("$locale")
-		generate_locale_mpqs "$locale"
+if [ -n "$SELECTED_LOCALES" ]; then
+	MISSING_LOCALES=()
+	IFS=',' read -ra SELECTED_LOCALES_ARR <<< "$SELECTED_LOCALES"
+	for locale in "${SELECTED_LOCALES_ARR[@]}"; do
+		if [ -d "$IN_PATH/$locale" ]; then
+			AVAILABLE_LOCALES+=("$locale")
+			generate_locale_mpqs "$locale"
+		else
+			MISSING_LOCALES+=("$locale")
+		fi
+	done
+	if [ ${#MISSING_LOCALES[@]} -gt 0 ]; then
+		error "could not find the following locale(s): ${MISSING_LOCALES[@]}"
 	fi
-done
-
-if [ ${#AVAILABLE_LOCALES[@]} -eq 0 ]; then
-	error "no valid locale data found in $(highlight "$IN_PATH")"
+else
+	AVAILABLE_LOCALES=( $(find "$IN_PATH" -regextype posix-extended -maxdepth 1 -type d -regex ".*/[a-z]{2}[A-Z]{2}$" | grep -Po "[a-z]{2}[A-Z]{2}$") ) || true # suppress error if grep fails to find anything
 fi
 
-echo "Found locales: ${AVAILABLE_LOCALES[@]}" | tee -a $LOG_FILE
+if [ ${#AVAILABLE_LOCALES[@]} -eq 0 ]; then
+	error "no valid locale data found"
+fi
+
+echo "Found locale(s): ${AVAILABLE_LOCALES[@]}" | tee -a $LOG_FILE
+
+for locale in "${AVAILABLE_LOCALES[@]}"; do
+	generate_locale_mpqs "$locale"
+done
 
 generate_locale_mpqs test
 NUM_JOBS=$(( ${#MPQS_SHARED[@]} * ${#PATTERNS_SHARED[@]} + ${#MPQS_LOCALE_test[@]} * ${#PATTERNS_LOCALE_SHARED[@]} + ${#MPQS_LOCALE_test[@]} * ${#PATTERNS_LOCALE[@]} * ${#AVAILABLE_LOCALES[@]}))

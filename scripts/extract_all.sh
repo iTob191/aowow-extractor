@@ -5,6 +5,7 @@ source utils.sh
 
 IN_PATH=/data
 OUT_PATH=/out
+LOCALES=$1
 
 if [ ! -d "$IN_PATH" ]; then
 	error "cannot find the mpq-archives at $(highlight "$IN_PATH")"
@@ -22,7 +23,7 @@ fi
 ERROR_FILE=$(mktemp)
 
 # extract mpq archives
-bash extract_mpq.sh $IN_PATH $OUT_PATH $ERROR_FILE
+bash extract_mpq.sh $IN_PATH $OUT_PATH $ERROR_FILE $LOCALES
 
 # convert images & audio files in parallel
 bash convert_blp.sh $OUT_PATH $ERROR_FILE &

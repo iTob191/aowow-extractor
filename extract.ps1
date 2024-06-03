@@ -2,7 +2,9 @@ param(
 	[Parameter(Position = 0, Mandatory)]
 	[string]$DataPath,
 	[Parameter(Position = 1, Mandatory)]
-	[string]$OutPath
+	[string]$OutPath,
+	[Parameter(Position = 2, Mandatory = $false)]
+	[string]$Locales = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -40,4 +42,4 @@ Write-Host "Building docker container ..."
 docker build --quiet --tag=aowow-extractor . | Out-Null || $(exit 1)
 
 Write-Host "Starting docker container ..."
-docker run --rm -it -v "${DataPath}:/data:ro" -v "${OutPath}:/out:rw" aowow-extractor || $(exit 1)
+docker run --rm -it -v "${DataPath}:/data:ro" -v "${OutPath}:/out:rw" aowow-extractor "$Locales" || $(exit 1)
