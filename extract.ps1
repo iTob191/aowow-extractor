@@ -39,7 +39,7 @@ if (-not (Test-Path $OutPath -PathType Container)) {
 }
 
 Write-Host "Building docker container ..."
-docker build --quiet --tag=aowow-extractor . | Out-Null || $(exit 1)
+docker build --tag=aowow-extractor . || $(exit 1)
 
 Write-Host "Starting docker container ..."
 docker run --rm -it -v "${DataPath}:/data:ro" -v "${OutPath}:/out:rw" aowow-extractor "$Locales" || $(exit 1)

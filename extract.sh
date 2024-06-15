@@ -43,7 +43,7 @@ elif [ ! -d "$OUT_PATH" ]; then
 fi
 
 echo "Building docker container ..."
-docker build --quiet --tag=aowow-extractor . >/dev/null || exit 1
+docker build --tag=aowow-extractor . || exit 1
 
 echo "Starting docker container ..."
 docker run --rm -it -v "$DATA_PATH:/data:ro" -v "$OUT_PATH:/out:rw" aowow-extractor "$LOCALES" || exit 1
